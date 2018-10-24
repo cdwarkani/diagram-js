@@ -47,7 +47,6 @@ describe('features/keyboard-navigation', function() {
 
   });
 
-
   describe('arrow bindings', function() {
 
     var KEYS = {
@@ -61,31 +60,72 @@ describe('features/keyboard-navigation', function() {
 
     describe('with default config', function() {
 
-      /* eslint-disable no-multi-spaces */
-      var decisionTable = [
-        { desc: 'left arrow',            keys: KEYS.LEFT,  shiftKey: false, x: -50, y: 0 },
-        { desc: 'right arrow',           keys: KEYS.RIGHT, shiftKey: false, x: 50,  y: 0 },
-        { desc: 'up arrow',              keys: KEYS.UP,    shiftKey: false, x: 0,   y: -50 },
-        { desc: 'down arrow',            keys: KEYS.DOWN,  shiftKey: false, x: 0,   y: 50 }
-      ];
-      /* eslint-enable */
+      var BASE_SPEED = 50,
+          HIGH_SPEED = 200;
 
-      forEach(decisionTable, function(testCase) {
+      describe('without shift', function() {
 
-        forEach(testCase.keys, function(key) {
+        /* eslint-disable no-multi-spaces */
+        var decisionTable = [
+          { desc: 'move left',  keys: KEYS.LEFT,  x: -BASE_SPEED, y: 0 },
+          { desc: 'move right', keys: KEYS.RIGHT, x: BASE_SPEED,  y: 0 },
+          { desc: 'move up',    keys: KEYS.UP,    x: 0,           y: -BASE_SPEED },
+          { desc: 'move down',  keys: KEYS.DOWN,  x: 0,           y: BASE_SPEED },
+        ];
+        /* eslint-enable */
 
-          it('should handle ' + testCase.desc, inject(function(canvas, keyboard) {
+        forEach(decisionTable, function(testCase) {
 
-            // given
-            var event = createKeyEvent(key, { shiftKey: testCase.shiftKey });
+          forEach(testCase.keys, function(key) {
 
-            // when
-            keyboard._keyHandler(event);
+            it('should ' + testCase.desc, inject(function(canvas, keyboard) {
 
-            // then
-            expect(canvas.viewbox().x).to.eql(testCase.x);
-            expect(canvas.viewbox().y).to.eql(testCase.y);
-          }));
+              // given
+              var event = createKeyEvent(key, { shiftKey: false });
+
+              // when
+              keyboard._keyHandler(event);
+
+              // then
+              expect(canvas.viewbox().x).to.eql(testCase.x);
+              expect(canvas.viewbox().y).to.eql(testCase.y);
+            }));
+
+          });
+
+        });
+
+      });
+
+      describe('with shift', function() {
+
+        /* eslint-disable no-multi-spaces */
+        var decisionTable = [
+          { desc: 'move left',  keys: KEYS.LEFT,  x: -HIGH_SPEED, y: 0 },
+          { desc: 'move right', keys: KEYS.RIGHT, x: HIGH_SPEED,  y: 0 },
+          { desc: 'move up',    keys: KEYS.UP,    x: 0,           y: -HIGH_SPEED },
+          { desc: 'move down',  keys: KEYS.DOWN,  x: 0,           y: HIGH_SPEED },
+        ];
+        /* eslint-enable */
+
+        forEach(decisionTable, function(testCase) {
+
+          forEach(testCase.keys, function(key) {
+
+            it('should ' + testCase.desc, inject(function(canvas, keyboard) {
+
+              // given
+              var event = createKeyEvent(key, { shiftKey: true });
+
+              // when
+              keyboard._keyHandler(event);
+
+              // then
+              expect(canvas.viewbox().x).to.eql(testCase.x);
+              expect(canvas.viewbox().y).to.eql(testCase.y);
+            }));
+
+          });
 
         });
 
@@ -117,6 +157,32 @@ describe('features/keyboard-navigation', function() {
           // then
           expect(canvas.viewbox().x).to.eql(0);
           expect(canvas.viewbox().y).to.eql(23);
+
+        });
+      });
+
+
+      it('should use custom modified speed', function() {
+
+        // given
+        var customConfig = {
+          keyboardNavigation: {
+            moveSpeedModified: 1
+          }
+        };
+
+        bootstrapDiagram(assign({}, defaultDiagramConfig, customConfig))();
+
+        var keyDownEvent = createKeyEvent(KEYS.DOWN[0], { shiftKey: true });
+
+        getDiagramJS().invoke(function(canvas, keyboard) {
+
+          // when
+          keyboard._keyHandler(keyDownEvent);
+
+          // then
+          expect(canvas.viewbox().x).to.eql(0);
+          expect(canvas.viewbox().y).to.eql(1);
 
         });
       });
