@@ -3,15 +3,25 @@ import {
   inject
 } from 'test/TestHelper';
 
+import modelingModule from 'lib/features/modeling';
 import moveCanvasModule from 'lib/navigation/movecanvas';
-import interactionEventsModule from 'lib/features/interaction-events';
 
 
 describe('navigation/movecanvas', function() {
 
+  var defaultDiagramConfig = {
+    modules: [
+      modelingModule,
+      moveCanvasModule
+    ],
+    canvas: {
+      deferUpdate: false
+    }
+  };
+
   describe('bootstrap', function() {
 
-    beforeEach(bootstrapDiagram({ modules: [ moveCanvasModule ] }));
+    beforeEach(bootstrapDiagram(defaultDiagramConfig));
 
 
     it('should bootstrap', inject(function(moveCanvas, canvas) {
@@ -32,7 +42,7 @@ describe('navigation/movecanvas', function() {
 
   describe('integration', function() {
 
-    beforeEach(bootstrapDiagram({ modules: [ moveCanvasModule, interactionEventsModule ] }));
+    beforeEach(bootstrapDiagram(defaultDiagramConfig));
 
 
     it('should silence click', inject(function(eventBus, moveCanvas, canvas) {
