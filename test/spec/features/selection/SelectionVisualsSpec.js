@@ -6,7 +6,7 @@ import {
 import selectionModule from 'lib/features/selection';
 
 import {
-  query as domQuery
+  matches
 } from 'min-dom';
 
 
@@ -27,7 +27,7 @@ describe('features/selection/SelectionVisuals', function() {
 
   describe('selection box', function() {
 
-    var shape, shape2, connection;
+    var shape, shape2, connection, label;
 
     beforeEach(inject(function(elementFactory, canvas) {
 
@@ -53,6 +53,14 @@ describe('features/selection/SelectionVisuals', function() {
       });
 
       canvas.addConnection(connection);
+
+      label = elementFactory.createLabel({
+        id: 'label',
+        x: 250, y: 200, width: 20, height: 20,
+        labelTarget: connection
+      });
+
+      canvas.addShape(label);
     }));
 
 
@@ -63,10 +71,38 @@ describe('features/selection/SelectionVisuals', function() {
 
       // then
       var gfx = canvas.getGraphics(connection),
-          outline = domQuery('.djs-outline', gfx);
+          hasOutline = matches(gfx, '.selected');
 
-      expect(outline).to.exist;
+      expect(hasOutline).to.be.true;
     }));
+
+
+    it('should show box on connection-labels on select',
+      inject(function(selection, canvas) {
+
+        // when
+        selection.select(connection);
+
+        // then
+        var gfx = canvas.getGraphics(label),
+            hasOutline = matches(gfx, '.selected');
+
+        expect(hasOutline).to.be.true;
+      }));
+
+
+    it('should show box on connection on selecting label',
+      inject(function(selection, canvas) {
+
+        // when
+        selection.select(label);
+
+        // then
+        var gfx = canvas.getGraphics(connection),
+            hasOutline = matches(gfx, '.selected');
+
+        expect(hasOutline).to.be.true;
+      }));
 
   });
 
